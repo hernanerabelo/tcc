@@ -1,0 +1,240 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE workflow PUBLIC "-//OpenSymphony Group//DTD OSWorkflow 2.6//EN" "http://www.opensymphony.com/osworkflow/workflow_2_8.dtd">
+<workflow>
+  <initial-actions>
+    <action id="0" name="Inicializa Workflow">
+      <pre-functions>
+        <function type="beanshell">
+          <arg name="script">
+            com.tcc.model.ServiceOrder order = transientVars.get("serviceOrder");
+
+            System.out.println("Começando o fluxo para Ordem: " + order.getId() );
+          </arg>
+        </function>
+      </pre-functions>
+      <results>
+        <unconditional-result old-status="Workflow de Ferias Inicializado" status="Inicializando Workflow" step="1" />
+      </results>
+    </action>
+  </initial-actions>
+
+  <steps>
+    <step id="1" name="Coleta Assinatura do Funcionario">
+      <actions>
+        <action id="1" name="Coleta Assinatura do Funcionário">
+          <pre-functions>
+            <function type="beanshell">
+              <arg name="script">
+                System.out.println("Validando Assinatura do Funcionário");
+              </arg>
+            </function>
+          </pre-functions>
+          <results>
+            <result old-status="Documento Assinado Pelo Funcionário" status="Envia Documento para Gestor" step="2">
+              <conditions type="AND">
+                <condition type="beanshell">
+                  <arg name="script">
+                    return true;
+                  </arg>
+                </condition>
+              </conditions>
+              <post-functions>
+                <function type="beanshell">
+                  <arg name="script">
+                    System.out.println("Assinatura Correta");
+                  </arg>
+                </function>
+              </post-functions>
+            </result>
+            <unconditional-result old-status="Documento com Assinatura Errada" status="Aguardando Assinatura do Funcionário" step="1"/>
+          </results>
+        </action>
+      </actions>
+    </step>
+
+    <step id="2" name="Gestor Autoriza Pedido de Ferias">
+      <actions>
+        <action id="2" name="Gestor Autoriza Pedido de Ferias">
+          <pre-functions>
+            <function type="beanshell">
+              <arg name="script">
+                System.out.println("Validando autorização do Gestor");
+              </arg>
+            </function>
+          </pre-functions>
+          <results>
+            <result old-status="Gestor Autorizou o Pedido" status="Aprovação do RH" step="3">
+              <conditions type="AND">
+                <condition type="beanshell">
+                  <arg name="script">
+                    return true;
+                  </arg>
+                </condition>
+              </conditions>
+              <post-functions>
+                <function type="beanshell">
+                  <arg name="script">
+                    System.out.println("Gestor Autorizou o Pedido de Ferias");
+                  </arg>
+                </function>
+              </post-functions>
+            </result>
+            <result old-status="Gestor Recusou o Pedido" status="Cancela Solicitação de Ferias" step="5">
+              <conditions type="AND">
+                <condition type="beanshell">
+                  <arg name="script">
+                    return false;
+                  </arg>
+                </condition>
+              </conditions>
+              <post-functions>
+                <function type="beanshell">
+                  <arg name="script">
+                    System.out.println("Gestor Recusou o Pedido de Ferias");
+                  </arg>
+                </function>
+              </post-functions>
+            </result>
+            <unconditional-result old-status="Aguardando Aprovação do Gestor" status="Aguardando Aprovação do Gestor" step="2"/>
+          </results>
+        </action>
+      </actions>
+    </step>
+
+    <step id="3" name="RH Valida Ferias">
+      <actions>
+        <action id="3" name="RH Valida Ferias">
+          <pre-functions>
+            <function type="beanshell">
+              <arg name="script">
+                System.out.println("Validando autorização do RH");
+              </arg>
+            </function>
+          </pre-functions>
+          <results>
+            <result old-status="RH Autorizou o Pedido" status="Notifica Funcionário" step="4">
+              <conditions type="AND">
+                <condition type="beanshell">
+                  <arg name="script">
+                    return true;
+                  </arg>
+                </condition>
+              </conditions>
+              <post-functions>
+                <function type="beanshell">
+                  <arg name="script">
+                    System.out.println("RH Autorizou o Pedido de Ferias");
+                  </arg>
+                </function>
+              </post-functions>
+            </result>
+            <result old-status="RH Recusou o Pedido" status="Cancela Solicitação de Ferias" step="5">
+              <conditions type="AND">
+                <condition type="beanshell">
+                  <arg name="script">
+                    return false;
+                  </arg>
+                </condition>
+              </conditions>
+              <post-functions>
+                <function type="beanshell">
+                  <arg name="script">
+                    System.out.println("RH Recusou o Pedido de Ferias");
+                  </arg>
+                </function>
+              </post-functions>
+            </result>
+            <unconditional-result old-status="Aguardando Aprovação do RH" status="Aguardando Aprovação do RH" step="3"/>
+          </results>
+        </action>
+      </actions>
+    </step>
+
+    <step id="4" name="Notifica Funcionário">
+      <actions>
+        <action id="4" name="Notifica Funcionário" auto="true">
+          <pre-functions>
+            <function type="beanshell">
+              <arg name="script">
+                System.out.println("Notificando Funcionário");
+              </arg>
+            </function>
+          </pre-functions>
+          <results>
+            <result old-status="Funcionário Notificado" status="Finaliza Fluxo" step="6">
+              <conditions type="AND">
+                <condition type="beanshell">
+                  <arg name="script">
+                    return true;
+                  </arg>
+                </condition>
+              </conditions>
+              <post-functions>
+                <function type="beanshell">
+                  <arg name="script">
+                    System.out.println("Funcionário Notificado");
+                  </arg>
+                </function>
+              </post-functions>
+            </result>
+            <unconditional-result old-status="Notificando Funcionário" status="Notificando Funcionário" step="4"/>
+          </results>
+        </action>
+      </actions>
+    </step>
+
+    <step id="5" name="Cancela Solicitação de Ferias">
+      <actions>
+        <action id="5" name="Cancela Solicitação de Ferias" auto="true">
+          <pre-functions>
+            <function type="beanshell">
+              <arg name="script">
+                System.out.println("Cancelando Solicitação de Férias");
+              </arg>
+            </function>
+          </pre-functions>
+          <results>
+            <result old-status="Solicitação de Férias Cancelado" status="Notifica Funcionário" step="4">
+              <conditions type="AND">
+                <condition type="beanshell">
+                  <arg name="script">
+                    return true;
+                  </arg>
+                </condition>
+              </conditions>
+              <post-functions>
+                <function type="beanshell">
+                  <arg name="script">
+                    System.out.println("Cancelado Solicitação de Férias");
+                  </arg>
+                </function>
+              </post-functions>
+            </result>
+            <unconditional-result old-status="Cancelando Solicitação de Férias" status="Cancelando Solicitação de Férias" step="5"/>
+          </results>
+        </action>
+      </actions>
+    </step>
+
+    <step id="6" name="Finaliza Fluxo">
+      <actions>
+        <action id="6" name="Notifica Funcionário" finish="true" auto="true">
+          <pre-functions>
+            <function type="beanshell">
+              <arg name="script">
+                System.out.println("Finalizando Fluxo");
+              </arg>
+            </function>
+          </pre-functions>
+          <results>
+            <unconditional-result old-status="Fluxo Finalizado" />
+          </results>
+        </action>
+      </actions>
+    </step>
+
+
+
+  </steps>
+</workflow>
+
